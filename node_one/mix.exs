@@ -12,7 +12,11 @@ defmodule NodeOne.MixProject do
   end
 
   def application do
-    [mod: {NodeOne, []}, applications: [:amqp], extra_applications: [:logger]]
+    [
+      mod: {NodeOne, []},
+      applications: [:amqp, :httpoison],
+      extra_applications: [:logger]
+    ]
   end
 
   defp deps do

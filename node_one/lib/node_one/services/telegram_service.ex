@@ -1,9 +1,9 @@
 defmodule NodeOne.TelegramService do
   require Logger
 
-  @config Application.get_env(:node_one, __MODULE__)
-  @url @config[:url]
-  @token @config[:token]
+  @config     Application.get_env(:node_one, __MODULE__)
+  @url        @config[:url]
+  @token      @config[:token]
   @channel_id @config[:channel_id]
 
   def check() do
