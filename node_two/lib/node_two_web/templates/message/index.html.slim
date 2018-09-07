@@ -1,0 +1,12 @@
+.ibox
+  .ibox-title
+    h5 Channel messages
+  .ibox-content.no-padding
+    ul.list-group
+      = for msg <- @messages do
+        li.list-group-item
+          p = msg.text
+
+  = form_for @changeset, message_path(@conn, :create), fn f ->
+    = text_input f, :text
+    = submit "Send"

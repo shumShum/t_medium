@@ -17,20 +17,18 @@ defmodule NodeOne.TelegramService do
   def updates(last_date \\ 0) do
     case request(:get, "getUpdates") do
       {:ok, %{"ok" => true, "result" => updates}} ->
-        selected_updates =
+        messages =
           for %{
                 "channel_post" => %{
                   "chat" => %{"id" => @channel_id},
                   "date" => date,
-                  "text" => _
+                  "text" => text
                 }
               } = post <- updates,
               date > last_date,
-              do: post
+              do: %{text: text, date: date}
 
-        new_last_date = selected_updates |> List.last() |> get_in(["channel_post", "date"])
-        messages = selected_updates |> Enum.map(&(&1 |> get_in(["channel_post", "text"])))
-        {:ok, messages, new_last_date || last_date}
+        {:ok, messages}
 
       {:error, _} = err ->
         err

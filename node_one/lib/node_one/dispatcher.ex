@@ -23,8 +23,15 @@ defmodule NodeOne.Dispatcher do
 
   def handle_info(:poll, state) do
     case TelegramService.updates(state.last_update_date) do
-      {:ok, messages, last_update_date} ->
-        for msg <- messages, do: RabbitService.send(msg)
+      {:ok, messages} ->
+        for msg <- messages, do: msg |> Poison.encode!() |> RabbitService.send()
+
+        last_update_date =
+          case List.last(messages) do
+            nil -> state.last_update_date
+            msg -> msg.date
+          end
+
         schedule_poll()
 
         {:noreply, %{state | last_update_date: last_update_date}}

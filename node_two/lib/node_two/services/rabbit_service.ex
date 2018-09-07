@@ -1,10 +1,11 @@
-defmodule NodeOne.RabbitService do
+defmodule NodeTwo.RabbitService do
   use GenServer
   use AMQP
+  require Logger
 
   def start_link, do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
-  @config Application.get_env(:node_one, __MODULE__)
+  @config Application.get_env(:node_two, __MODULE__)
   @queue_to    @config[:queue_to]
   @queue_from  @config[:queue_from]
   @user        @config[:user]
@@ -38,8 +39,9 @@ defmodule NodeOne.RabbitService do
 
   def send(msg), do: GenServer.cast(__MODULE__, {:send, msg})
 
-  defp consume(channel, tag, msg) do
-    with :ok <- NodeOne.Dispatcher.send(msg) do
+  defp consume(channel, tag, payload) do
+    with %{"text" => text, "date" => date} <- payload |> Poison.decode!(),
+         {:ok, _} <- NodeTwo.Message.create(text, date) do
       :ok = Basic.ack channel, tag
     end
   end
