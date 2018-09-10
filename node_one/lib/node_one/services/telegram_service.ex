@@ -24,7 +24,7 @@ defmodule NodeOne.TelegramService do
                   "date" => date,
                   "text" => text
                 }
-              } = post <- updates,
+              } <- updates,
               date > last_date,
               do: %{text: text, date: date}
 

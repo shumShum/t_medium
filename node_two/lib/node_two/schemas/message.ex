@@ -1,6 +1,8 @@
 defmodule NodeTwo.Message do
   use NodeTwo.Schema
 
+  @rabbit Application.get_env(:node_two, :rabbit_service)
+
   schema "messages" do
     field(:text, :string)
     field(:date, :integer)
@@ -23,7 +25,7 @@ defmodule NodeTwo.Message do
     |> changeset(%{text: text, date: last_date() + 1})
     |> NodeTwo.Repo.insert()
     |> case do
-      {:ok, msg} -> NodeTwo.RabbitService.send(msg.text)
+      {:ok, msg} -> @rabbit.send(msg.text)
       {:error, _} = err -> err
     end
   end

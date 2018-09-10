@@ -24,7 +24,8 @@ defmodule NodeOne.MixProject do
       {:httpoison, "~> 1.0", override: true},
       {:poison, "~> 4.0"},
       {:amqp, "~> 1.0"},
-      {:ranch_proxy_protocol, "~> 2.0", override: true}
+      {:ranch_proxy_protocol, "~> 2.0", override: true},
+      {:mock, "~> 0.2", only: :test}
     ]
   end
 end

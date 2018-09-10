@@ -2,14 +2,14 @@ defmodule NodeOne.Dispatcher do
   use GenServer
   require Logger
 
-  alias NodeOne.{TelegramService, RabbitService}
-
   def start_link(), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   @polling_interval Application.get_env(:node_one, __MODULE__)[:polling_interval]
+  @telegram Application.get_env(:node_one, :telegram_service)
+  @rabbit Application.get_env(:node_one, :rabbit_service)
 
   def init(_) do
-    case TelegramService.check() do
+    case @telegram.check() do
       :ok ->
         Logger.info("Dispatcher started")
         schedule_poll()
@@ -22,9 +22,9 @@ defmodule NodeOne.Dispatcher do
   end
 
   def handle_info(:poll, state) do
-    case TelegramService.updates(state.last_update_date) do
+    case @telegram.updates(state.last_update_date) do
       {:ok, messages} ->
-        for msg <- messages, do: msg |> Poison.encode!() |> RabbitService.send()
+        for msg <- messages, do: msg |> Poison.encode!() |> @rabbit.send()
 
         last_update_date =
           case List.last(messages) do
@@ -45,7 +45,7 @@ defmodule NodeOne.Dispatcher do
   end
 
   def handle_cast({:send, msg}, state) do
-    case TelegramService.send(msg) do
+    case @telegram.send(msg) do
       :ok -> {:noreply, state}
       {:error, err} -> {:stop, err, state}
     end
@@ -53,6 +53,5 @@ defmodule NodeOne.Dispatcher do
 
   def send(msg), do: GenServer.cast(__MODULE__, {:send, msg})
 
-  defp schedule_poll(),
-    do: Process.send_after(self(), :poll, @polling_interval)
+  defp schedule_poll(), do: Process.send_after(self(), :poll, @polling_interval)
 end

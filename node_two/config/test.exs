@@ -17,3 +17,5 @@ config :node_two, NodeTwo.Repo,
   database: "node_two_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :node_two, :rabbit_service, NodeTwo.RabbitService.Mock

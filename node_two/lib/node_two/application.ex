@@ -14,7 +14,7 @@ defmodule NodeTwo.Application do
       supervisor(NodeTwoWeb.Endpoint, []),
       # Start your own worker by calling: NodeTwo.Worker.start_link(arg1, arg2, arg3)
       # worker(NodeTwo.Worker, [arg1, arg2, arg3]),
-      worker(NodeTwo.RabbitService, [])
+      worker(Application.get_env(:node_two, :rabbit_service), [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
