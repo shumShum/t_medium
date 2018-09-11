@@ -1,6 +1,7 @@
 defmodule NodeOne.RabbitService do
   use GenServer
   use AMQP
+  require Logger
 
   def start_link, do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
@@ -10,17 +11,7 @@ defmodule NodeOne.RabbitService do
   @user        @config[:user]
   @password    @config[:password]
 
-  def init(_) do
-    with {:ok, conn} <- Connection.open("amqp://#{@user}:#{@password}@localhost"),
-         {:ok, chan} <- Channel.open(conn),
-         {:ok, _} <- AMQP.Queue.declare(chan, @queue_to),
-         {:ok, _} <- AMQP.Queue.declare(chan, @queue_from),
-         {:ok, _} = Basic.consume(chan, @queue_from) do
-      {:ok, chan}
-    else
-      {:error, error} -> {:stop, error, []}
-    end
-  end
+  def init(_), do: init_connection()
 
   def handle_info({:basic_consume_ok, %{consumer_tag: _}}, chan), do: {:noreply, chan}
 
@@ -37,6 +28,21 @@ defmodule NodeOne.RabbitService do
   end
 
   def send(msg), do: GenServer.cast(__MODULE__, {:send, msg})
+
+  defp init_connection() do
+    with {:ok, conn} <- Connection.open("amqp://#{@user}:#{@password}@rabbit"),
+         {:ok, chan} <- Channel.open(conn),
+         {:ok, _} <- AMQP.Queue.declare(chan, @queue_to),
+         {:ok, _} <- AMQP.Queue.declare(chan, @queue_from),
+         {:ok, _} <- Basic.consume(chan, @queue_from) do
+      {:ok, chan}
+    else
+      error ->
+        error |> inspect() |> Logger.error()
+        :timer.sleep(1000)
+        init_connection()
+    end
+  end
 
   defp consume(channel, tag, msg) do
     with :ok <- NodeOne.Dispatcher.send(msg) do

@@ -9,8 +9,8 @@ config :node_one, NodeOne.Dispatcher,
 
 config :node_one, NodeOne.TelegramService,
   url: "https://api.telegram.org/",
-  token: System.get_env("TELEGRAM_BOT_TOKEN") || "655692156:AAHhgO1mx0yBoTlO0nMa2DNyxUSciLMCpHU",
-  channel_id: System.get_env("TELEGRAM_CHANNEL_ID") || -1001346130646
+  token: {:system, "TELEGRAM_BOT_TOKEN"},
+  channel_id: {:system, "TELEGRAM_CHANNEL_ID"}
 
 config :node_one, NodeOne.RabbitService,
   queue_to: "one2two",

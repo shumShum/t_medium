@@ -12,7 +12,7 @@ defmodule NodeTwo.RabbitService do
   @password    @config[:password]
 
   def init(_) do
-    with {:ok, conn} <- Connection.open("amqp://#{@user}:#{@password}@localhost"),
+    with {:ok, conn} <- Connection.open("amqp://#{@user}:#{@password}@rabbit"),
          {:ok, chan} <- Channel.open(conn),
          {:ok, _} <- AMQP.Queue.declare(chan, @queue_to),
          {:ok, _} <- AMQP.Queue.declare(chan, @queue_from),

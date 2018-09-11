@@ -1,0 +1,28 @@
+version: '2'
+services:
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+
+  rabbit:
+    image: rabbitmq:3.5.3-management
+    ports:
+      - "8080:15672"
+      - "5672:5672"
+
+  node_one:
+    build: ./node_one/
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
+    depends_on:
+      - rabbit
+
+  node_two:
+    build: ./node_two/
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - rabbit
